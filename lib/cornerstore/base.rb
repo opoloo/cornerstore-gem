@@ -4,6 +4,9 @@ class Cornerstore::Base
   self.include_root_in_json = false
   
   attr_accessor :_id
+  def id
+    _id
+  end
   
   def initialize(attributes = {})  
     self.attributes = attributes
@@ -15,7 +18,11 @@ class Cornerstore::Base
     end 
   end
   
-  def to_param
-    self._id
-  end
+  def self.method_missing(method, *args, &block)
+    if self.const_defined?("Resource") and self.const_get("Resource").method_defined?(method)
+      self.const_get("Resource").new.send(method, *args, &block)
+    else
+      super
+    end
+  end  
 end

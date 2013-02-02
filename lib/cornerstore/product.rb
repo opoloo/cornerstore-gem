@@ -2,23 +2,58 @@ class Cornerstore::Product < Cornerstore::Base
   attr_accessor :name,
                 :description,
                 :manufacturer, 
+                :enabled,
                 :variants
   
   def initialize(attributes = {})
+    # Variants are nested
+    if variants_attributes = attributes.delete('variants')
+      self.variants = variants_attributes.map do |hash|
+        variant = Cornerstore::Variant.new(hash)
+        variant.product = self
+        variant
+      end
+    end
     super
-    self.variants = attributes['variants'].map{|variant_hash| Cornerstore::Variant.new(variant_hash)} if attributes['variants']
-    self
   end
   
-  def self.all
-    response = RestClient.get("http://#{Cornerstore.options[:account_name]}.cskit.monkeyandco.net/api/products.json")
-    array = ActiveSupport::JSON.decode(response)
-    array.map{|product_hash| self.new(product_hash)}
+  def to_param
+    "#{_id}-#{name.parameterize}"
   end
   
-  def self.find(id)
-    response = RestClient.get("http://#{Cornerstore.options[:account_name]}.cskit.monkeyandco.net/api/products/#{id}.json")
-    hash = ActiveSupport::JSON.decode(response)
-    self.new(hash)
+  class Resource < Cornerstore::Resource
+    def enabled
+      resource = self.clone
+      resource.set_filter(:enabled, true)
+      resource
+    end
+    
+    def by_collection(collection_id)
+      resource = self.clone
+      resource.set_filter(:collection_id, collection_id)
+      resource
+    end
+    alias find_by_collection by_collection
+    
+    def by_keywords(keywords)
+      resource = self.clone
+      resource.set_filter(:keywords, keywords)
+      resource
+    end
+    alias find_by_keywords by_keywords
+    
+    private
+    
+    def url_for_all
+      if collection_id = @filters[:collection_id]
+        "#{Cornerstore.root_url}/collections/#{collection_id}/products.json"
+      else
+        "#{Cornerstore.root_url}/products.json"
+      end
+    end
+    
+    def query_string
+      super(@filters.delete_if{|key| key == :collection_id})
+    end   
   end
 end
