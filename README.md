@@ -17,4 +17,6 @@ This is a client for the Cornerstore e-commerce API
     product = Cornerstore::Product.find("5107c57596c70bbb82000013")
     first_variant = product.variants.first
     
+    ten_popular_products = Cornerstore::Product.enabled.order('popularity').offset(20).limit(10)
+    
 Someday someone should write some documentation

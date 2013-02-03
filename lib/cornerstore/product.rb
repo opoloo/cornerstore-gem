@@ -42,6 +42,15 @@ class Cornerstore::Product < Cornerstore::Base
     end
     alias find_by_keywords by_keywords
     
+    def order(key)
+      first = %w(name popularity created_at price)
+      second = %w(desc asc)
+      pattern = /\A(#{first.join('|')})( (#{second.join('|')}))?\z/i
+      raise "order key must be one of: #{first.join(', ')} [#{second.join(', ')}]" unless key.match pattern
+      super
+    end
+    alias order_by order
+    
     private
     
     def url_for_all

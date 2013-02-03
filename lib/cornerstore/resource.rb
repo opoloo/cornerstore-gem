@@ -34,6 +34,27 @@ class Cornerstore::Resource
     self.clone
   end
   
+  def offset(offset)
+    resource = self.clone
+    resource.set_filter(:offset, offset.to_i.abs)
+    resource
+  end
+  
+  def limit(limit)
+    limit = limit.to_i.abs
+    raise "limit must be greater/equal to 1" unless limit > 1
+    resource = self.clone
+    resource.set_filter(:limit, limit)
+    resource
+  end
+  
+  def order(key)
+    resource = self.clone
+    resource.set_filter(:order, key)
+    resource
+  end
+  alias order_by order
+  
   def to_a
     load_all if @objects.empty?
     @objects
