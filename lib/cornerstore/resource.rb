@@ -60,6 +60,10 @@ class Cornerstore::Resource
     @objects
   end
   
+  def to_url
+    url_for_all + query_string
+  end
+  
   protected
       
   def url_for_id(id)
@@ -83,8 +87,8 @@ class Cornerstore::Resource
   end
   
   def load_all
-    puts "\e[32mRequesting #{self.class.name.split('::')[-2].pluralize} from #{url_for_all}#{query_string}\e[0m"
-    response = RestClient.get(url_for_all + query_string)  
+    puts "\e[32mRequesting #{self.class.name.split('::')[-2].pluralize} from #{to_url}\e[0m"
+    response = RestClient.get(to_url)  
     array = ActiveSupport::JSON.decode(response)
     @objects = array.map{|hash| @klass.new(hash)}
   end
