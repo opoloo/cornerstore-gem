@@ -8,6 +8,10 @@ require 'cornerstore/product'
 require 'cornerstore/variant'
 require 'cornerstore/price'
 require 'cornerstore/collection'
+require 'cornerstore/cart'
+require 'cornerstore/line_item'
+
+require_relative '../tests/dummy'
 
 module Cornerstore
   def self.options
