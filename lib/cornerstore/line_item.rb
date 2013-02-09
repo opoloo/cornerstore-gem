@@ -13,40 +13,45 @@ class Cornerstore::LineItem < Cornerstore::Base
   validates :unit, length: { within: 1..20 }
   validates :price, presence: true
   validates :weight, numericality: { greater_than: 0, allow_nil: true }
-  
-  def new_record?
-    id.nil?
+  validate do
+    errors.add(:price, 'Price must be valid') unless price.valid?
   end
   
-  def save
-    attributes = {
+  def initialize(attributes={})
+    self.price = Cornerstore::Price.new(attributes.delete('price'))
+    super
+  end
+  
+  def attributes
+    {
       order_number: order_number,
       description: description,
       qty: qty,
       unit: unit,
-      price: price,
+      price: price.attributes,
       weight: weight
     }
-    begin
-      if new_record?
-        response = RestClient.post("#{Cornerstore.root_url}/carts/#{cart.id}/line_items.json", line_item: attributes)  
-        attributes = ActiveSupport::JSON.decode(response)
-      else
-        response = RestClient.patch("#{Cornerstore.root_url}/carts/#{cart.id}/line_items/#{id}.json", line_item: attributes)
-      end
-    rescue => e
-      puts e.response
+  end
+  
+  def save
+    return false unless valid?
+    if new_record?
+      response = RestClient.post("#{Cornerstore.root_url}/carts/#{cart.id}/line_items.json", line_item: self.attributes){|response| response}
+      attributes = ActiveSupport::JSON.decode(response)
+    else
+      response = RestClient.patch("#{Cornerstore.root_url}/carts/#{cart.id}/line_items/#{id}.json", line_item: self.attributes){|response| response}
     end
-    response.code == 200
+    response.success?
   end
   
   def destroy
-    
+    response = RestClient.delete("#{Cornerstore.root_url}/carts/#{cart.id}/line_items/#{id}.json")
+    response.success?
   end
   
   class Resource
     def initialize(parent)
-      @klass = Cornerstore.const_get(self.class.name.split('::')[-2])
+      @klass = Cornerstore::LineItem
       @objects = Array.new
       @parent = parent
     end
@@ -58,17 +63,21 @@ class Cornerstore::LineItem < Cornerstore::Base
     end
     alias_method :push, :<<
     
-    def new(attributes={})
-      line_item = @klass.new(attributes)
+    def new(attributes={}, &block)
+      line_item = @klass.new(attributes, &block)
       push line_item
       line_item
     end
     
-    def create(attributes={})
+    def create(attributes={}, &block)
       attributes['cart'] = @parent
-      line_item = @klass.new(attributes).save
-      push line_item
-      line_item
+      line_item = @klass.new(attributes, &block)
+      if line_item.save
+        push line_item
+        line_item
+      else
+        nil
+      end
     end
     
     def create_from_variant(variant)
@@ -76,11 +85,7 @@ class Cornerstore::LineItem < Cornerstore::Base
         variant_id: variant.id,
         product_id: variant.product.id
       }
-      begin
-        response = RestClient.post("#{Cornerstore.root_url}/carts/#{@parent.id}/line_items/derive.json", attributes)  
-      rescue => e
-        puts e.response
-      end
+      response = RestClient.post("#{Cornerstore.root_url}/carts/#{@parent.id}/line_items/derive.json", attributes)  
       attributes = ActiveSupport::JSON.decode(response)
       line_item = @klass.new(attributes)
       push line_item
@@ -88,9 +93,9 @@ class Cornerstore::LineItem < Cornerstore::Base
     end
     
     def destroy_all
-      
+      @objects.delete_if {|obj| obj.destroy}
+      self
     end
-    alias empty destroy_all
     
     def to_a
       @objects

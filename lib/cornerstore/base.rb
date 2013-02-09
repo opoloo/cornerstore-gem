@@ -1,7 +1,5 @@
 class Cornerstore::Base
   include ActiveModel::Validations
-  include ActiveModel::Serializers::JSON
-  self.include_root_in_json = false
   
   attr_accessor :_id
   def id
@@ -10,12 +8,23 @@ class Cornerstore::Base
   
   def initialize(attributes = {})  
     self.attributes = attributes
+    yield self if block_given?
   end
   
-  def attributes=(attributes = {})
+  def attributes=(attributes)
+    attributes ||= {}
     attributes.each do |name, value|  
       send("#{name}=", value) if respond_to?("#{name}=")
     end 
+  end
+  
+  def new?
+    id.nil?
+  end
+  alias new_record? new?
+  
+  def self.create(attributes = {}, &block)
+    self.new(attributes, &block).tap{|obj| obj.save}
   end
   
   def self.method_missing(method, *args, &block)

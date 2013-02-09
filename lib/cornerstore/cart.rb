@@ -14,23 +14,23 @@ class Cornerstore::Cart < Cornerstore::Base
   end
   
   def total
-    
+    line_items.inject(0) {|sum,item| sum + item.price.gross}
   end
   
-  def self.create
-    self.new.save
+  def empty
+    line_items.delete_all
+    line_items.empty?
   end
   
-  def new_record?
-    id.nil?
+  def empty?
+    line_items.empty?
   end
   
   def save
-    if new_record?
-      response = RestClient.post("#{Cornerstore.root_url}/carts.json", {})  
-      self.attributes = ActiveSupport::JSON.decode(response)
-    end
-    self
+    return false unless new_record?
+    response = RestClient.post("#{Cornerstore.root_url}/carts.json", {})  
+    self.attributes = ActiveSupport::JSON.decode(response)
+    response.success?
   end
 
   class Resource < Cornerstore::Resource

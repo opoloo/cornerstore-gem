@@ -27,4 +27,23 @@ module Cornerstore::Tests
     l.qty = 2
     l.save
   end
+  
+  def self.create_cart_and_items
+    cart = Cornerstore::Cart.create
+    (1..5).each do |i|
+      cart.line_items.create do |l|
+        l.order_number = i
+        l.description = "Test item #{i}"
+        l.qty = i
+        l.unit = "Stueck"
+        l.price = Cornerstore::Price.new do |p|
+          p.gross = 4.44
+          p.net = 3.33
+          p.tax_rate = 0.19
+          p.currency = "EUR"
+        end
+      end
+    end
+    cart
+  end
 end

@@ -1,3 +1,9 @@
+module RestClient::AbstractResponse
+  def success?
+    (200..207).include? code
+  end
+end
+
 class Cornerstore::Resource
   def initialize
     @klass = Cornerstore.const_get(self.class.name.split('::')[-2])
