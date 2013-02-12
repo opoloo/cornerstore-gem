@@ -1,12 +1,7 @@
-module RestClient::AbstractResponse
-  def success?
-    (200..207).include? code
-  end
-end
-
 class Cornerstore::Resource
-  def initialize
+  def initialize(parent=nil)
     @klass = Cornerstore.const_get(self.class.name.split('::')[-2])
+    @parent = parent
     @filters = Hash.new
     @objects = Array.new
   end
@@ -41,23 +36,17 @@ class Cornerstore::Resource
   end
   
   def offset(offset)
-    resource = self.clone
-    resource.set_filter(:offset, offset.to_i.abs)
-    resource
+    self.clone.set_filter(:offset, offset.to_i.abs)
   end
   
   def limit(limit)
     limit = limit.to_i.abs
     raise "limit must be greater/equal to 1" unless limit > 1
-    resource = self.clone
-    resource.set_filter(:limit, limit)
-    resource
+    self.clone.set_filter(:limit, limit)
   end
   
   def order(key)
-    resource = self.clone
-    resource.set_filter(:order, key)
-    resource
+    self.clone.set_filter(:order, key)
   end
   alias order_by order
   
@@ -66,18 +55,30 @@ class Cornerstore::Resource
     @objects
   end
   
-  def to_url
-    url_for_all + query_string
+  def first!
+    to_a.first
   end
   
-  protected
-      
+  def last!
+    to_a.last
+  end
+  
   def url_for_id(id)
-    "#{Cornerstore.root_url}/#{self.class.name.split('::')[-2].downcase.pluralize}/#{id}.json"
+    if @parent
+      "#{@parent.url}/#{self.class.name.split('::')[-2].underscore.pluralize}/#{id}"
+    else
+      raise "This resource needs a parent" if self.class.const_defined?('NESTED') and not @parent
+      "#{Cornerstore.root_url}/#{self.class.name.split('::')[-2].underscore.pluralize}/#{id}"
+    end
   end
   
   def url_for_all
-    "#{Cornerstore.root_url}/#{self.class.name.split('::')[-2].downcase.pluralize}.json"
+    if @parent
+      "#{@parent.url}/#{self.class.name.split('::')[-2].underscore.pluralize}"
+    else
+      raise "This resource needs a parent" if self.class.const_defined?('NESTED') and not @parent
+      "#{Cornerstore.root_url}/#{self.class.name.split('::')[-2].underscore.pluralize}"      
+    end
   end
   
   def query_string(filters=nil)
@@ -89,18 +90,38 @@ class Cornerstore::Resource
     puts "\e[32mRequesting #{self.class.name.split('::')[-2]} with ID=#{id} from #{url_for_id(id)}\e[0m"
     response = RestClient.get(url_for_id(id))
     hash = ActiveSupport::JSON.decode(response)
-    @klass.new(hash)
+    @klass.new(hash, @parent)
   end
   
   def load_all
-    puts "\e[32mRequesting #{self.class.name.split('::')[-2].pluralize} from #{to_url}\e[0m"
-    response = RestClient.get(to_url)  
+    puts "\e[32mRequesting #{self.class.name.split('::')[-2].pluralize} from #{url_for_all + query_string}\e[0m"
+    response = RestClient.get(url_for_all + query_string)  
     array = ActiveSupport::JSON.decode(response)
-    @objects = array.map{|hash| @klass.new(hash)}
+    @objects = array.map{|hash| @klass.new(hash, @parent)}
   end
   
   def set_filter(key, value)
     @filters[key] = value
+    self
+  end
+  
+  def <<(obj)
+    @objects << obj
+    obj.parent = @parent
+    self
+  end
+  alias_method :push, :<<
+  
+  def concat(ary)
+    ary.each{|obj| push obj }
+  end
+  
+  def new
+    raise "Sorry, this part of the Cornerstore-API is currently read-only"
+  end
+  
+  def create
+    raise "Sorry, this part of the Cornerstore-API is currently read-only"
   end
   
   def method_missing(method, *args, &block)
@@ -108,6 +129,30 @@ class Cornerstore::Resource
       to_a.send(method, *args, &block)
     else
       super
+    end
+  end
+end
+
+class Cornerstore::WritableResource < Cornerstore::Resource
+  def destroy_all
+    @objects.delete_if {|obj| obj.destroy}
+    self
+  end
+  
+  def new(attributes={}, &block)
+    obj = @klass.new(attributes, &block)
+    push obj
+    obj
+  end
+  
+  def create(attributes={}, &block)
+    attributes['parent'] = @parent
+    obj = @klass.new(attributes, &block)
+    if obj.save
+      push obj
+      obj
+    else
+      nil
     end
   end
 end

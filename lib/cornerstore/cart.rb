@@ -1,14 +1,10 @@
-class Cornerstore::Cart < Cornerstore::Base
+class Cornerstore::Cart < Cornerstore::Writable
   attr_accessor :line_items
   
-  def initialize(attributes = {})
+  def initialize(attributes = {}, parent=nil)
     self.line_items = Cornerstore::LineItem::Resource.new(self)
-    if line_items = attributes.delete('line_items')
-      self.line_items.concat line_items.map do |hash|
-        line_item = Cornerstore::LineItem.new(hash)
-        line_item.cart = self
-        line_item
-      end
+    if line_items_attributes = attributes.delete('line_items')
+      self.line_items.concat line_items_attributes.map {|hash| Cornerstore::LineItem.new(hash, self)}
     end
     super
   end
@@ -25,15 +21,8 @@ class Cornerstore::Cart < Cornerstore::Base
   def empty?
     line_items.empty?
   end
-  
-  def save
-    return false unless new_record?
-    response = RestClient.post("#{Cornerstore.root_url}/carts.json", {})  
-    self.attributes = ActiveSupport::JSON.decode(response)
-    response.success?
-  end
 
-  class Resource < Cornerstore::Resource
+  class Resource < Cornerstore::WritableResource
     
     def find_or_create_by_session
       if not session[:cart_id] or not cart = find_by_id(session[:cart_id])

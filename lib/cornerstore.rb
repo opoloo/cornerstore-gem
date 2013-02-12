@@ -13,6 +13,12 @@ require 'cornerstore/line_item'
 
 require_relative '../tests/dummy'
 
+module RestClient::AbstractResponse
+  def success?
+    (200..207).include? code
+  end
+end
+
 module Cornerstore
   def self.options
     @options ||= {

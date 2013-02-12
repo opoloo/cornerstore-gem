@@ -1,4 +1,6 @@
 class Cornerstore::Price < Cornerstore::Base
+  include ActiveModel::Validations
+
   attr_accessor :gross,
                 :net,
                 :tax_rate,

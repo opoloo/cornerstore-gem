@@ -5,14 +5,10 @@ class Cornerstore::Product < Cornerstore::Base
                 :enabled,
                 :variants
   
-  def initialize(attributes = {})
-    # Variants are nested
+  def initialize(attributes = {}, parent=nil)
+    self.variants = Cornerstore::Variant::Resource.new(self)
     if variants_attributes = attributes.delete('variants')
-      self.variants = variants_attributes.map do |hash|
-        variant = Cornerstore::Variant.new(hash)
-        variant.product = self
-        variant
-      end
+      self.variants.concat variants_attributes.map {|hash| Cornerstore::Variant.new(hash, self)}
     end
     super
   end
@@ -23,22 +19,17 @@ class Cornerstore::Product < Cornerstore::Base
   
   class Resource < Cornerstore::Resource
     def enabled
-      resource = self.clone
-      resource.set_filter(:enabled, true)
-      resource
+      self.clone.set_filter(:enabled, true)
     end
     
     def by_collection(collection_id)
-      resource = self.clone
-      resource.set_filter(:collection_id, collection_id)
-      resource
+      # self.clone.set_filter(:collection_id, collection_id)
+      self.clone.tap{|r| r.parent = Cornerstore::Collection.find(collection_id)}
     end
     alias find_by_collection by_collection
     
     def by_keywords(keywords)
-      resource = self.clone
-      resource.set_filter(:keywords, keywords)
-      resource
+      self.clone.set_filter(:keywords, keywords)
     end
     alias find_by_keywords by_keywords
     
@@ -51,15 +42,17 @@ class Cornerstore::Product < Cornerstore::Base
     end
     alias order_by order
     
-    private
-    
-    def url_for_all
-      if collection_id = @filters[:collection_id]
-        "#{Cornerstore.root_url}/collections/#{collection_id}/products.json"
-      else
-        "#{Cornerstore.root_url}/products.json"
-      end
-    end
+    # def self.url_for_id(id)
+    #   "#{Cornerstore.root_url}/products/#{id}.json"
+    # end
+        
+    # def url_for_all
+    #   if collection_id = @filters[:collection_id]
+    #     "#{Cornerstore.root_url}/collections/#{collection_id}/products"
+    #   else
+    #     "#{Cornerstore.root_url}/products"
+    #   end
+    # end
     
     def query_string
       super(@filters.delete_if{|key| key == :collection_id})
