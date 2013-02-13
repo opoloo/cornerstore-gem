@@ -24,14 +24,19 @@ class Cornerstore::Cart < Cornerstore::Model::Base
   class Resource < Cornerstore::Resource::Base
     include Cornerstore::Resource::Remote
     include Cornerstore::Resource::Writable
-    
-    def find_or_create_by_session
-      if not session[:cart_id] or not cart = find_by_id(session[:cart_id])
-        cart = Cart.create
-        session[:cart_id] = cart.id
-      end
-      cart
+  end
+end
+
+module Cornerstore::SessionCart
+  def self.included(base)
+    base.send(:before_filter, :find_or_create_by_session)
+  end
+  
+  def find_or_create_by_session
+    if not session[:cart_id] or not @cart = Cornerstore::Cart.find_by_id(session[:cart_id])
+      @cart = Cornerstore::Cart.create
+      session[:cart_id] = @cart.id
     end
-    
+    @cart
   end
 end
