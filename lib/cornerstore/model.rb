@@ -9,6 +9,7 @@ module Cornerstore
       def id
         _id
       end
+      alias to_param id
     
       def initialize(attributes = {}, parent = nil)  
         self.attributes = attributes
@@ -67,7 +68,7 @@ module Cornerstore
       end
     
       def destroy
-        RestClient.delete(to_url).success?
+        RestClient.delete(url).success?
       end
     
       def self.create(attributes = {}, &block)
