@@ -1,11 +1,10 @@
-class Cornerstore::Cart < Cornerstore::Writable
+class Cornerstore::Cart < Cornerstore::Model::Base
+  include Cornerstore::Model::Writable
+  
   attr_accessor :line_items
   
   def initialize(attributes = {}, parent=nil)
-    self.line_items = Cornerstore::LineItem::Resource.new(self)
-    if line_items_attributes = attributes.delete('line_items')
-      self.line_items.concat line_items_attributes.map {|hash| Cornerstore::LineItem.new(hash, self)}
-    end
+    self.line_items = Cornerstore::LineItem::Resource.new(self, attributes.delete('line_items') || [])
     super
   end
   
@@ -22,7 +21,9 @@ class Cornerstore::Cart < Cornerstore::Writable
     line_items.empty?
   end
 
-  class Resource < Cornerstore::WritableResource
+  class Resource < Cornerstore::Resource::Base
+    include Cornerstore::Resource::Remote
+    include Cornerstore::Resource::Writable
     
     def find_or_create_by_session
       if not session[:cart_id] or not cart = find_by_id(session[:cart_id])

@@ -1,0 +1,6 @@
+require 'cornerstore/api/product'
+require 'cornerstore/api/variant'
+require 'cornerstore/api/price'
+require 'cornerstore/api/collection'
+require 'cornerstore/api/cart'
+require 'cornerstore/api/line_item'

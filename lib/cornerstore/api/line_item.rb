@@ -1,4 +1,6 @@
-class Cornerstore::LineItem < Cornerstore::Writable
+class Cornerstore::LineItem < Cornerstore::Model::Base
+  include Cornerstore::Model::Writable
+  
   attr_accessor :order_number,
                 :description,
                 :qty,
@@ -18,7 +20,7 @@ class Cornerstore::LineItem < Cornerstore::Writable
     errors.add(:price, 'Price must be valid') unless price.valid?
   end
   
-  def initialize(attributes={}, parent=nil)
+  def initialize(attributes = {}, parent = nil)
     self.price = Cornerstore::Price.new(attributes.delete('price'))
     super
   end
@@ -34,7 +36,10 @@ class Cornerstore::LineItem < Cornerstore::Writable
     }
   end
   
-  class Resource < Cornerstore::WritableResource
+  class Resource < Cornerstore::Resource::Base
+    include Cornerstore::Resource::Remote
+    include Cornerstore::Resource::Writable
+    
     def create_from_variant(variant)
       attributes = {
         variant_id: variant.id,

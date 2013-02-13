@@ -2,7 +2,7 @@ module Cornerstore::Tests
   def self.get_some_products
     all_collections = Cornerstore::Collection.all
     
-    child_collection = Cornerstore::Collection.all.first.childs.first
+    child_collection = Cornerstore::Collection.last.childs.last
     
     products_from_child_collection = child_collection.products    
     products_from_child_collection = Cornerstore::Product.by_collection(child_collection.id)
@@ -13,7 +13,7 @@ module Cornerstore::Tests
     product = Cornerstore::Product.all.last
     first_variant = product.variants.first
     
-    ten_popular_products = Cornerstore::Product.enabled.order('popularity').offset(20).limit(10)
+    ten_popular_products = Cornerstore::Product.enabled.order('popularity').offset(10).limit(10).to_a
   end
   
   def self.create_line_item_from_variant
@@ -30,7 +30,7 @@ module Cornerstore::Tests
   
   def self.create_cart_and_items
     cart = Cornerstore::Cart.create
-    (1..5).each do |i|
+    5.times do |i|
       cart.line_items.create do |l|
         l.order_number = i
         l.description = "Test item #{i}"

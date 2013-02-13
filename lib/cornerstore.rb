@@ -2,14 +2,9 @@ require 'active_model'
 require 'rest_client'
 
 require 'cornerstore/version'
-require 'cornerstore/base'
 require 'cornerstore/resource'
-require 'cornerstore/product'
-require 'cornerstore/variant'
-require 'cornerstore/price'
-require 'cornerstore/collection'
-require 'cornerstore/cart'
-require 'cornerstore/line_item'
+require 'cornerstore/model'
+require 'cornerstore/api'
 
 require_relative '../tests/dummy'
 
@@ -18,6 +13,8 @@ module RestClient::AbstractResponse
     (200..207).include? code
   end
 end
+
+RestClient.log = 'stdout'
 
 module Cornerstore
   def self.options
