@@ -3,6 +3,13 @@ class Cornerstore::Variant < Cornerstore::Model::Base
                 :price
                 
   alias product parent
+  
+  def attributes
+    {
+      order_number: order_number,
+      price: price
+    }
+  end
                 
   def initialize(attributes = {}, parent = nil)
     self.price = Cornerstore::Price.new(attributes.delete('price'))

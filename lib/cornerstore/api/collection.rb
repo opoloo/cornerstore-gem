@@ -3,16 +3,24 @@ class Cornerstore::Collection < Cornerstore::Model::Base
                 :parent,
                 :members,
                 :childs,
-                :products
+                :products,
+                :properties
                 
   def initialize(attributes = {}, parent = nil)
     self.products = Cornerstore::Product::Resource.new(self)
     self.childs = Cornerstore::Collection::Resource.new(self, attributes.delete('child_collections') || [], 'childs')
+    self.properties = Cornerstore::Property::Resource.new(self, attributes.delete('properties') || [])
     super
   end
 
   def to_param
     "#{_id}-#{name.parameterize}"
+  end
+  
+  def attributes
+    {
+      name: name
+    }
   end
   
   class Resource < Cornerstore::Resource::Base

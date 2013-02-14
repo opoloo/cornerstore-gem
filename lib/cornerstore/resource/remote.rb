@@ -1,6 +1,4 @@
-module Cornerstore::Resource::Remote
-  attr_accessor :load
-  
+module Cornerstore::Resource::Remote  
   def url(id = nil, depth = 1)
     root = (@parent && depth > 0) ? @parent.url(depth-1) : Cornerstore.root_url
     "#{root}/#{@name or @klass.name.split('::').last.underscore.pluralize}/#{id}"

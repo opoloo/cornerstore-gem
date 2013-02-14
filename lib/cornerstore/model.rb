@@ -10,6 +10,15 @@ module Cornerstore
         _id
       end
       alias to_param id
+      
+      def ==(other)
+        other.id == self.id
+      end
+      alias eql? ==
+      
+      def inspect
+        {class: self.class.name, id: id}.merge!(attributes).to_s
+      end
     
       def initialize(attributes = {}, parent = nil)  
         self.attributes = attributes

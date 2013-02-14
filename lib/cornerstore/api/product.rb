@@ -14,6 +14,19 @@ class Cornerstore::Product < Cornerstore::Model::Base
     "#{_id}-#{name.parameterize}"
   end
   
+  def attributes
+    {
+      name: name,
+      description: description,
+      manufacturer: manufacturer,
+      enabled: enabled
+    }
+  end
+  
+  def price
+    variants.collect{|v| v.price.gross}.sort.first
+  end
+  
   class Resource < Cornerstore::Resource::Base
     include Cornerstore::Resource::Remote
     include Cornerstore::Resource::Filter
