@@ -33,7 +33,7 @@ module Cornerstore::SessionCart
   end
   
   def find_or_create_by_session
-    if not session[:cart_id] or not @cart = Cornerstore::Cart.find_by_id(session[:cart_id])
+    if not session[:cart_id] or not @cart = Cornerstore::Cart.find_by_id(session[:cart_id]) rescue nil
       @cart = Cornerstore::Cart.create
       session[:cart_id] = @cart.id
     end
