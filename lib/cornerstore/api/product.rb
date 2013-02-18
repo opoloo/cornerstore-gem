@@ -27,6 +27,10 @@ class Cornerstore::Product < Cornerstore::Model::Base
     variants.collect{|v| v.price.gross}.sort.first
   end
   
+  def order_number
+    variants.many? ? :many : variants.first.order_number
+  end
+  
   class Resource < Cornerstore::Resource::Base
     include Cornerstore::Resource::Remote
     include Cornerstore::Resource::Filter
