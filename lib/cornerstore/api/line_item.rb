@@ -40,11 +40,11 @@ class Cornerstore::LineItem < Cornerstore::Model::Base
     include Cornerstore::Resource::Remote
     include Cornerstore::Resource::Writable
     
-    def create_from_variant(variant)
-      attributes = {
+    def create_from_variant(variant, attributes={})
+      attributes.merge!({
         variant_id: variant.id,
         product_id: variant.product.id
-      }
+      })
       response = RestClient.post("#{Cornerstore.root_url}/carts/#{@parent.id}/line_items/derive.json", attributes)  
       attributes = ActiveSupport::JSON.decode(response)
       line_item = @klass.new(attributes)
