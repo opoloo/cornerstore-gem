@@ -19,7 +19,7 @@ RestClient.log = 'stdout'
 module Cornerstore
   def self.options
     @options ||= {
-      account_name: 'burger-store'
+      account_name: 'geileweine'
     }
   end
   def self.root_url
