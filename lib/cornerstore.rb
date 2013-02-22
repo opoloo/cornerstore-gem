@@ -23,6 +23,9 @@ module Cornerstore
     }
   end
   def self.root_url
-    "http://#{Cornerstore.options[:account_name]}.cskit.monkeyandco.net/api"  
+    "http://#{Cornerstore.options[:account_name]}.cskit.monkeyandco.net/api"
+  end
+  def self.assets_url
+    "http://cskit-production.s3.amazonaws.com"
   end
 end
