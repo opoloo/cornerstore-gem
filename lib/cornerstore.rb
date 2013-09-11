@@ -19,11 +19,12 @@ RestClient.log = 'stdout'
 module Cornerstore
   def self.options
     @options ||= {
-      account_name: 'geileweine'
+      account_name: 'burgerstore'
     }
   end
   def self.root_url
-    "http://#{Cornerstore.options[:account_name]}.cskit.monkeyandco.net/api"
+    #"http://#{Cornerstore.options[:account_name]}.cskit.monkeyandco.net/api"
+    "http://#{Cornerstore.options[:account_name]}.staging.cornerstore.io/api"
   end
   def self.assets_url
     "http://cskit-production.s3.amazonaws.com"
