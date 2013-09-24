@@ -7,7 +7,8 @@ class Cornerstore::Variant < Cornerstore::Model::Base
                 :oversell,
                 :weight,
                 :unit,
-                :properties
+                :properties,
+                :differentiating_properties
 
   alias product parent
   alias offer? offer
