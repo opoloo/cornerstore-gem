@@ -4,10 +4,11 @@ module Cornerstore
       include ActiveModel::Validations
 
       attr_accessor :_id
+      attr_accessor :_slugs
       attr_accessor :parent
 
       def id
-        _id
+        (!_slugs.nil? && _slugs.first) || _id
       end
       alias to_param id
 
