@@ -43,7 +43,7 @@ class Cornerstore::LineItem < Cornerstore::Model::Base
     def create_from_variant(variant, attr={})
       attributes = {
         variant_id: variant.id,
-        product_id: variant.product.id,
+        product_id: variant.product._id,
         line_item: attr
       }
       response = RestClient.post("#{Cornerstore.root_url}/carts/#{@parent.id}/line_items/derive.json", attributes)

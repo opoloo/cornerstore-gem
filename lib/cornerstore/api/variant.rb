@@ -32,6 +32,11 @@ class Cornerstore::Variant < Cornerstore::Model::Base
     super
   end
 
+ def id
+    _id
+  end
+  alias to_param id
+
   def qty_available
     if self.qty_in_stock and not self.oversell
       self.qty_in_stock - self.qty_reserved
