@@ -6,7 +6,8 @@ class Cornerstore::LineItem < Cornerstore::Model::Base
                 :qty,
                 :unit,
                 :price,
-                :weight
+                :weight,
+                :properties
 
   alias cart parent
 
@@ -22,6 +23,7 @@ class Cornerstore::LineItem < Cornerstore::Model::Base
 
   def initialize(attributes = {}, parent = nil)
     self.price = Cornerstore::Price.new(attributes.delete('price'))
+    self.properties = Cornerstore::Property::Resource.new(self, attributes.delete('properties') || [])
     super
   end
 
