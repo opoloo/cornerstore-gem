@@ -24,7 +24,7 @@ module Cornerstore
   end
   def self.root_url
     #"http://#{Cornerstore.options[:account_name]}.cskit.monkeyandco.net/api"
-    "http://api.#{Cornerstore.options[:account_name]}.cornerstore.io/v1"
+    "https://api.#{Cornerstore.options[:account_name]}.cornerstore.io/v1"
     #"http://#{Cornerstore.options[:account_name]}.staging.cornerstore.io/api"
   end
   def self.assets_url
