@@ -2,6 +2,7 @@ class Cornerstore::Cart < Cornerstore::Model::Base
   include Cornerstore::Model::Writable
   
   attr_accessor :line_items
+  attr_accessor :reference
   
   def initialize(attributes = {}, parent=nil)
     self.line_items = Cornerstore::LineItem::Resource.new(self, attributes.delete('line_items') || [])
@@ -9,7 +10,7 @@ class Cornerstore::Cart < Cornerstore::Model::Base
   end
 
    def id
-    _id
+    reference
   end
   alias to_param id
   
