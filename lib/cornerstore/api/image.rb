@@ -1,16 +1,20 @@
 class Cornerstore::Image < Cornerstore::Model::Base
   attr_accessor :cover,
-                :file_file_size,
-                :file_content_type,
-                :file_file_name
+                :size,
+                :format,
+                :height,
+                :width,
+                :key
 
-  alias content_type file_content_type
-  alias file_size file_file_size
+
+  alias content_type format
+  alias file_size size
 
   # small, small_square, medium, medium_square, large
-  def url(size = :medium)
-    ext = file_file_name.split('.').last
-    "#{Cornerstore.assets_url}/product_images/#{_id}/#{size}.#{ext}"
+  def url(w=600, h=600)
+    #ext = file_file_name.split('.').last
+    #{}"#{Cornerstore.assets_url}/product_images/#{_id}/#{size}.#{ext}"
+    "http://res.cloudinary.com/hgzhd1stm/image/upload/c_scale,h_#{h},w_#{w}/#{self.key}"
   end
 
   class Resource < Cornerstore::Resource::Base

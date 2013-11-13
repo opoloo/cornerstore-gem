@@ -7,7 +7,8 @@ class Cornerstore::Variant < Cornerstore::Model::Base
                 :oversell,
                 :weight,
                 :unit,
-                :properties
+                :properties,
+                :differentiating_properties
 
   alias product parent
   alias offer? offer
@@ -30,6 +31,11 @@ class Cornerstore::Variant < Cornerstore::Model::Base
     self.properties = Cornerstore::Property::Resource.new(self, attributes.delete('properties') || [])
     super
   end
+
+ def id
+    _id
+  end
+  alias to_param id
 
   def qty_available
     if self.qty_in_stock and not self.oversell

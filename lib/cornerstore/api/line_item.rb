@@ -6,7 +6,8 @@ class Cornerstore::LineItem < Cornerstore::Model::Base
                 :qty,
                 :unit,
                 :price,
-                :weight
+                :weight,
+                :properties
 
   alias cart parent
 
@@ -22,6 +23,7 @@ class Cornerstore::LineItem < Cornerstore::Model::Base
 
   def initialize(attributes = {}, parent = nil)
     self.price = Cornerstore::Price.new(attributes.delete('price'))
+    self.properties = Cornerstore::Property::Resource.new(self, attributes.delete('properties') || [])
     super
   end
 
@@ -43,7 +45,7 @@ class Cornerstore::LineItem < Cornerstore::Model::Base
     def create_from_variant(variant, attr={})
       attributes = {
         variant_id: variant.id,
-        product_id: variant.product.id,
+        product_id: variant.product._id,
         line_item: attr
       }
       response = RestClient.post("#{Cornerstore.root_url}/carts/#{@parent.id}/line_items/derive.json", attributes)

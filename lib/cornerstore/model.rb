@@ -4,10 +4,11 @@ module Cornerstore
       include ActiveModel::Validations
 
       attr_accessor :_id
+      attr_accessor :_slugs
       attr_accessor :parent
 
       def id
-        _id
+        (!_slugs.nil? && _slugs.first) || _id
       end
       alias to_param id
 
@@ -72,10 +73,11 @@ module Cornerstore
         return false unless valid?
         wrapped_attributes = {self.class.name.split('::').last.underscore => self.attributes}
         if new?
+          #response = RestClient.post(url, wrapped_attributes, verify_ssl: OpenSSL::SSL::VERIFY_NONE){|response| response}
           response = RestClient.post(url, wrapped_attributes){|response| response}
           self.attributes = ActiveSupport::JSON.decode(response)
         else
-          response = RestClient.patch(url, wrapped_attributes){|response| response}
+          response = RestClient.patch(url, wrapped_attributes, ){|response| response}
         end
         response.success?
       end
