@@ -28,7 +28,7 @@ class Cornerstore::Product < Cornerstore::Model::Base
   end
 
   def price
-    variants.collect{|v| v.price.gross}.sort.first
+    variants.collect { |v| v.price }.sort.first
   end
 
   def order_number
@@ -36,15 +36,19 @@ class Cornerstore::Product < Cornerstore::Model::Base
   end
 
   def sold_out?
-    variants.all?{|v| v.sold_out?}
+    variants.all? { |v| v.sold_out? }
   end
 
-  def offer
-    variants.any{|v| v.offer?}
+  def offer?
+    variants.any? { |v| v.offer? }
+  end
+  
+  def new?
+    self.created_at <= 2.weeks.ago
   end
 
   def cover_image
-    self.images.to_a.find{|i| i.cover == true}
+    @cover_image ||= self.images.to_a.find {|i| i.cover == true }
   end
 
   class Resource < Cornerstore::Resource::Base
