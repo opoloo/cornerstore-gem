@@ -12,10 +12,6 @@ class Cornerstore::Collection < Cornerstore::Model::Base
     self.properties = Cornerstore::Property::Resource.new(self, attributes.delete('properties') || [])
     super
   end
-
-  def to_param
-    "#{_id}-#{name.parameterize}"
-  end
   
   def attributes
     {

@@ -6,25 +6,31 @@ module Cornerstore
       attr_accessor :_id
       attr_accessor :_slugs
       attr_accessor :parent
-
-      def id
-        (!_slugs.nil? && _slugs.first) || _id
-      end
-      alias to_param id
-
-      def ==(other)
-        other.id == self.id
-      end
-      alias eql? ==
-
-      def inspect
-        {class: self.class.name, id: id}.merge!(attributes).to_s
-      end
-
+      attr_accessor :created_at
+      attr_accessor :updated_at
+      
+      alias id _id
+      
       def initialize(attributes = {}, parent = nil)
         self.attributes = attributes
         self.parent = parent
         yield self if block_given?
+      end
+      
+      def to_param
+        if _slugs and !_slugs.empty?
+          _slugs.first
+        end
+      end
+      
+      def ==(other)
+        other.id == self.id
+      end
+      
+      alias eql? ==
+
+      def inspect
+        {class: self.class.name, id: id}.merge!(attributes).to_s
       end
 
       def attributes
